@@ -13,7 +13,7 @@ CREATE TABLE chunks (
     document_id INTEGER REFERENCES documents(id) ON DELETE CASCADE,
     chunk_index INTEGER NOT NULL,
     content TEXT NOT NULL,
-    embedding VECTOR(768), -- adjust depending on model
+    embedding VECTOR(960), -- adjust depending on model
     token_count INTEGER,
     created_at TIMESTAMP DEFAULT NOW()
 );
