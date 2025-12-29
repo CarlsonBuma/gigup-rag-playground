@@ -4,7 +4,7 @@ from PyPDF2 import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
-class PdfChunker:
+class Chunker:
     """Extracts and chunks text from PDF files using a modern RAG-friendly splitter."""
 
     def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 150):

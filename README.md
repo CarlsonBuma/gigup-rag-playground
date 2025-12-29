@@ -42,7 +42,7 @@ This project is a lightweight, fully local Retrieval‑Augmented Generation (RAG
 
 ```
 Ingestion Phase:
-  PDF → PdfChunker → Semantic Chunks
+  PDF → Chunker → Semantic Chunks
                            ↓
                     Embedding (Ollama)
                            ↓
@@ -74,7 +74,7 @@ Retrieval Phase:
 | Component | Purpose |
 |-----------|---------|
 | **Ollama** | Provides embeddings + LLM generation locally |
-| **PdfChunker** | Extracts text from PDFs, intelligently chunks content |
+| **Chunker** | Extracts text from PDFs, intelligently chunks content |
 | **Embedding Engine** | Converts text to 1024-dim vectors |
 | **PostgreSQL + pgvector** | Stores vectors, performs similarity search |
 | **RagController** | Orchestrates ingestion, search, generation |

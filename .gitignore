@@ -1,4 +1,3 @@
 venv/
 .env
-app/store/*
 __pycache__/
