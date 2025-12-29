@@ -1,55 +1,60 @@
-import psycopg
-from pgvector.psycopg import register_vector
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker, declarative_base
+from pgvector.sqlalchemy import Vector
 from .config import Config
+import pandas as pd
+
+
+Base = declarative_base()
 
 class Database:
     def __init__(self):
-        self.url = Config.DATABASE_URL
+        self.engine = create_engine(Config.DATABASE_URL)
+        self.SessionLocal = sessionmaker(bind=self.engine)
 
-    def connect(self):
-        conn = psycopg.connect(self.url)
-        register_vector(conn)
-        return conn
+    def session(self):
+        return self.SessionLocal()
+    
+    def check_connection(self):
+        try:
+            with self.engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            return True
+        except Exception as e:
+            print("✗ Database connection FAILED")
+            print("Error:", e)
+            return False
+        
+    def show_schema(self):
+        print("✓ DB Schema")
+        for table_name, table in Base.metadata.tables.items():
+            rows = []
+            for column in table.columns:
+                rows.append({
+                    "column": column.name,
+                    "type": str(column.type),
+                    "primary_key": column.primary_key,
+                    "nullable": column.nullable,
+                    "default": column.default
+                })
 
-    def init_schema(self):
-        CREATE_DOCUMENTS = """
-        CREATE TABLE IF NOT EXISTS documents (
-            id SERIAL PRIMARY KEY,
-            title TEXT NOT NULL,
-            description TEXT,
-            source_type TEXT,
-            created_at TIMESTAMP DEFAULT NOW()
-        );
-        """
+            df = pd.DataFrame(rows)
+            print(f"\nTable: {table_name}")
+            print(df.to_string(index=False))
+    
+    # Drop entire public schema    
+    def set_new_environment(self):
+        with self.engine.connect() as conn:
+            conn.execute(text("DROP SCHEMA public CASCADE;"))
+            conn.execute(text("CREATE SCHEMA public;"))
+            conn.commit()
+        print("✓ Schema reset")
 
-        CREATE_CHUNKS = f"""
-        CREATE TABLE IF NOT EXISTS chunks (
-            id SERIAL PRIMARY KEY,
-            document_id INTEGER REFERENCES documents(id) ON DELETE CASCADE,
-            chunk_index INTEGER NOT NULL,
-            content TEXT NOT NULL,
-            embedding VECTOR(960),
-            token_count INTEGER,
-            created_at TIMESTAMP DEFAULT NOW()
-        );
-        """
+        # Create pgvector extension
+        with self.engine.connect() as conn:
+            conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+            conn.commit()
+        print("✓ pgvector extension ready")
 
-        conn = self.connect()
-        with conn.cursor() as cur:
-            cur.execute(CREATE_DOCUMENTS)
-            cur.execute(CREATE_CHUNKS)
-        conn.commit()
-        conn.close()
-
-    def get_embedding_dimension(self):
-        conn = self.connect()
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT atttypmod - 4
-                FROM pg_attribute
-                WHERE attrelid = 'chunks'::regclass
-                AND attname = 'embedding';
-            """)
-            dim = cur.fetchone()[0]
-        conn.close()
-        return dim
+        # Recreate tables
+        Base.metadata.create_all(self.engine)   

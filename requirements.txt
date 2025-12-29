@@ -1,25 +1,36 @@
-jupyter
-folium
-psycopg2-binary
+# Core scientific + data stack
+numpy
 pandas
 geopandas
-sqlalchemy
+shapely
 matplotlib
-geopy
-shapely 
-requests
-openpyxl
 seaborn
-fastapi
-uvicorn[standard]
+openpyxl
+
+# Geospatial + mapping
+folium
+geopy
+
+# Database + vector search
+sqlalchemy
 psycopg[binary]
 pgvector
+
+# Web + API
+fastapi
+uvicorn[standard]
 requests
 python-dotenv
-numpy
-tiktoken
+
+# NLP + embeddings + RAG
 sentence-transformers
+tiktoken
 langchain
 langchain-community
 ollama
-pdfplumber
+
+# PDF processing
+PyPDF2
+
+# Jupyter environment
+jupyter

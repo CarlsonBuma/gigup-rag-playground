@@ -86,14 +86,14 @@ services:
     ports:
       - "11434:11434"
     volumes:
-      - ollama_models:/root/.ollama
+      - OLLAMA_LLM_MODELs:/root/.ollama
     networks:
       - localnet
 
 volumes:
   pgvector_data:
   pgadmin_data:
-  ollama_models:
+  OLLAMA_LLM_MODELs:
 
 networks:
   localnet:

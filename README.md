@@ -1,93 +1,99 @@
-# Project Overview
-A Python project with Jupyter notebooks, leveraging PostgreSQL with pgVector, Ollama LLM runtime, and various data science and AI libraries.
+# Local RAG Playground — A Microlearning Guide
 
+Welcome to the Local RAG Playground — a hands‑on environment designed to help you understand how Retrieval‑Augmented Generation (RAG) works using Python, Ollama, and pgvector.
 
+This project is intentionally simple, transparent, and educational.
+Everything runs locally, so you can explore RAG concepts without external APIs or cloud dependencies.
 
-### Prerequisites
+## 🧩 What This Project Is
 
-- Python 3.8+ installed locally
-- Docker Environment running (for database and LLM services)
-- VS Code with Jupyter extension enabled
+This project is a lightweight, fully local Retrieval‑Augmented Generation (RAG) system built with:
 
+- **Python** — Core language
+- **Ollama** — Local LLM + Embeddings engine
+- **PostgreSQL + pgvector** — Vector database
+- **LangChain** — Text splitting & orchestration
+- **Jupyter** — Interactive experimentation notebooks
 
-> **⚠️ System Requirements**: 
-Even small LLM models (e.g., smollm:360m) run efficiently on modern CPUs, but they still benefit from having enough RAM and available compute. For a smooth experience when running Ollama inside Docker, ensure your machine has at least 8 GB of RAM, though 16 GB or more is recommended if you plan to run multiple services or larger models.
+### You Can:
+- Ingest documents (PDFs, resumes, knowledge files)
+- Chunk them into semantically meaningful pieces
+- Embed them using multilingual embedding models
+- Store embeddings in a vector database
+- Perform semantic search over your knowledgebase
+- Generate answers grounded in your documents
 
-## Getting Started
+## 🚀 Features
 
-### 1. Set Up Python Virtual Environment
-
-```bash
-# Create virtual environment
-python -m venv venv
-
-# Activate environment (Windows)
-.\venv\Scripts\activate
-
-# Activate environment (macOS/Linux)
-source venv/bin/activate
-```
-
-### 2. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Start Docker Services
-
-```bash
-docker-compose up -d
-```
-
-See [readme-docker.md](readme-docker.md) for detailed service configuration and troubleshooting.
-
-### 4. Deactivate Environment
-
-```bash
-deactivate
-```
-
-## Project Structure
-
-```
-├── app/
-│   ├── init.ipynb          # Jupyter notebook initialization
-│   ├── db/
-│   │   ├── init.sql        # Database initialization script
-│   │   └── extensions/
-│   │       └── vector.sql  # pgVector extension setup
-│   └── store/              # Storage directory
-├── docker-compose.yml      # Docker services configuration
-├── requirements.txt        # Python dependencies
-├── readme-docker.md        # Setup Docker Environment
-└── README.md               # This file
-```
-
-## Key Technologies
-
-- **PostgreSQL + pgVector**: Vector database for embeddings
-- **Ollama**: Local LLM runtime for inference
-- **Jupyter**: Interactive notebooks for development
-- **LangChain**: LLM orchestration and chains
-- **GeoPandas/Folium**: Geospatial analysis and mapping
-- **FastAPI**: Web API framework
-- **SQLAlchemy**: Database ORM
-
-## Quick Commands
-
-| Command | Purpose |
+| Feature | Benefit |
 |---------|---------|
-| `.\venv\Scripts\activate` | Activate virtual environment (Windows) |
-| `source venv/bin/activate` | Activate virtual environment (macOS/Linux) |
-| `pip install -r requirements.txt` | Install Python dependencies |
-| `docker-compose up -d` | Start Docker services |
-| `docker-compose down` | Stop Docker services |
-| `docker-compose logs -f` | View service logs |
-| `deactivate` | Deactivate virtual environment |
+| 📄 PDF ingestion with text extraction | Easy document loading |
+| ✂️ Semantic chunking | Preserves context & meaning |
+| 🧠 Multilingual embeddings | Works across languages |
+| 🔍 Vector similarity search | Find relevant content fast |
+| 🧱 Modular architecture | Easy to understand & extend |
+| 🧪 Jupyter notebooks | Learn interactively |
+| 🔒 Fully local | No external APIs, complete privacy |
 
 
-## Resources
+## 🧱 Architecture Overview
 
-- See [readme-docker.md](readme-docker.md) for Docker setup and service documentation
-- Notebooks are located in `app/*`
+### The RAG Pipeline
+
+```
+Ingestion Phase:
+  PDF → PdfChunker → Semantic Chunks
+                           ↓
+                    Embedding (Ollama)
+                           ↓
+                     pgvector (Store)
+
+Retrieval Phase:
+  User Query → Embedding (Ollama) → Vector Search → Top K Chunks → LLM → Answer
+```
+
+### Data Flow Example:
+
+```
+1. Upload file.pdf
+   └─ Extract text
+   └─ Split into chunks (preserving context)
+   └─ Convert each chunk to embedding vector
+   └─ Store in PostgreSQL with pgvector
+
+2. User asks: "What are the candidate's skills?"
+   └─ Convert question to embedding
+   └─ Search pgvector for similar chunks (cosine distance)
+   └─ Retrieve top 3 matching chunks
+   └─ Pass to LLM: "Based on these chunks, answer the question"
+   └─ Return grounded answer
+```
+
+## 🧩 Core Components
+
+| Component | Purpose |
+|-----------|---------|
+| **Ollama** | Provides embeddings + LLM generation locally |
+| **PdfChunker** | Extracts text from PDFs, intelligently chunks content |
+| **Embedding Engine** | Converts text to 1024-dim vectors |
+| **PostgreSQL + pgvector** | Stores vectors, performs similarity search |
+| **RagController** | Orchestrates ingestion, search, generation |
+| **SQLAlchemy Models** | ORM for documents, chunks, embeddings |
+
+Each component is intentionally small and easy to understand.
+
+## ⚙️ System Requirements
+
+### Hardware
+
+- **RAM**: 8 GB minimum (16 GB recommended for smooth operation)
+- **Disk**: 10 GB+ for models and data
+- **CPU**: Modern processor (LLMs work on CPU, but benefit from adequate cores)
+
+### Software
+
+- **Python 3.10+**
+- **PostgreSQL 13+** with pgvector extension
+  - Vector column: `embedding vector(1024)`
+- **Ollama** installed and running locally
+- **Docker** (optional, for containerized services)

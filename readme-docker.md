@@ -30,65 +30,7 @@ Open a terminal where your `docker-compose.yml` lives:
    - `ollama_local` (or whatever names you used)
 
 
-## 3. Configure PostgreSQL (pgvector)
-
-1. **Open pgAdmin in your browser**
-   - Go to: `http://localhost:5050`
-   - Login with:
-     - Email: `admin@admin.com`
-     - Password: `admin`
-
-2. **Register the Postgres server**
-   - Right-click **Servers** → **Create** → **Server…**
-   - **General → Name:** `pgvector_db` (any label you like)
-   - **Connection tab:**
-     - **Host name/address:** `pgvector`  
-       (Use the Docker service name, not `localhost`.)
-     - **Port:** `5432`
-     - **Maintenance database:** `postgres`
-     - **Username:** `postgres`
-     - **Password:** `postgres`
-   - Save.
-
-3. **Enable the `vector` extension**
-   - In pgAdmin, expand your server → **Databases → postgres**.
-   - Right-click **postgres** → **Query Tool**.
-   - Run:
-     ```sql
-     CREATE EXTENSION IF NOT EXISTS vector;
-     ```
-   - Execute (lightning bolt icon).
-
-Now pgvector is ready.
-
-
-## 4. Sanity check: simple table using `vector`
-
-Run this in the same Query Tool to confirm everything works:
-
-```sql
-CREATE TABLE IF NOT EXISTS documents (
-  id SERIAL PRIMARY KEY,
-  content TEXT,
-  embedding VECTOR(3)
-);
-
-INSERT INTO documents (content, embedding)
-VALUES
-  ('hello world', '[0.1, 0.2, 0.3]'),
-  ('another doc', '[0.2, 0.1, 0.0]');
-```
-
-Then:
-
-```sql
-SELECT * FROM documents;
-```
-
-If that works, your DB + pgvector are fine.
-
-
-## 5. Configure and test Ollama container (LLM)
+## 3. Configure Ollama container (LLM & Embeddings)
 
 1. **Enter the Ollama container**
    ```bash
@@ -97,37 +39,32 @@ If that works, your DB + pgvector are fine.
    (Replace `ollama_local` with your container_name if different.)
 
 2. **Pull a model**
-   Local Environment: - .env OLLAMA_MODEL
+   Local Environment:
 
    ```bash
-   ollama pull smollm:360m
+   ollama pull smollm:360m        # LLM
+   ollama pull mxbai-embed-large  # Embedding, 1024 Dimension (680 MB)
    ```
    
-   Live Environment: - .env OLLAMA_MODEL
+   Live Environment:
 
    ```bash
-   ollama pull llama3
+   ollama pull llama3             # LLM
+   ollama pull mxbai-embed-large  # Embedding, 1024 Dimension (680 MB)
    ```
 
-3. **Exit the container**
+3. Check Ollama Models
+   ```bash
+   ollama list
+   ```
+
+4. **Exit the container**
    ```bash
    exit
    ```
 
-4. **Test the API from your host (Windows)**
-   In your PowerShell or terminal:
 
-   ```bash
-   curl http://localhost:11434/api/generate `
-    -Method POST `
-    -Body "{""model"":""smollm:360m"",""prompt"":""Hello from Windows via Docker""}" `
-    -ContentType "application/json"
-   ```
-
-   You should see a streaming JSON response with generated text.
-
-
-## 6. Stop and restart the whole stack
+## 4. Stop and restart the whole stack
 
 - **Stop all containers**
   ```bash
@@ -138,4 +75,4 @@ If that works, your DB + pgvector are fine.
   docker compose up -d
   ```
 
-Volumes (`pgvector_data`, `pgadmin_data`, `ollama_models`) keep your data and models.
+Volumes (`pgvector_data`, `pgadmin_data`, `OLLAMA_MODELS`) keep your data and models.
